@@ -37,7 +37,7 @@ CRAX_STAMP = ''
 ###############################################################
 
 def touch(file):
-    optn(file, 'a').close()
+    open(file, 'a').close()
 
 def verify():
     # execute autoit script to do varify exploit
@@ -71,14 +71,17 @@ def verify():
 # while loop to wait stamp
 # try to connect to local server to get stamp
 
+CRAX_MY_HOSTNAME = socket.gethostname()
+CRAX_MY_ADDR = socket.gethostbyname(CRAX_MY_HOSTNAME)
+
 while True:
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((CRAX_HOST_IP, CRAX_HOST_PORT))
 
-        client.send('12345abcde')
+        client.send(CRAX_MY_ADDR)
         CRAX_STAMP = client.recv(512)
-        print CRAX_STAMP
+        print 'get stamp from host: ', CRAX_STAMP
         break
     except socket.error:
         print 'socket error'
@@ -94,9 +97,6 @@ while True:
 # -----------------------------
 # got stamp, prepare environment
 # -----------------------------
-
-CRAX_MY_HOSTNAME = socket.gethostname()
-CRAX_MY_ADDR = socket.gethostbyname(CRAX_MY_HOSTNAME)
 
 CRAX_DIR_STAMPING = os.path.join((CRAX_DIR_STAMP, CRAX_STAMP))
 
@@ -192,10 +192,7 @@ while True:
 # execute autoit script to do openfile
 #os.system("")
 
-
 # s2e-qemu may be killed in this state
-
-
 
 # should not go here
 exit(1)
