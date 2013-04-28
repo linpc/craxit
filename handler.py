@@ -1,6 +1,7 @@
 #!python
 
 import os
+import psutil
 import socket
 import time
 
@@ -10,11 +11,14 @@ import time
 
 CRAX_DIR_NFS = 'Z:\CRF'
 CRAX_DIR_STAMP = os.path.join((CRAX_DIR_NFS, 'stamp'))
+CRAX_DIR_AUTOIT = os.path.join((CRAX_DIR_NFS, 'autoit'))
 
 CRAX_HOST_IP = '10.113.208.67'
 CRAX_HOST_PORT = 12345
 
 CRAX_TIME_SYMFILE = 30
+CRAX_TIME_EXPLOIT = 20
+CRAX_TIME_LONGWAIT = 5
 
 CRAX_STATUS_READY = 0
 CRAX_STATUS_SYMFILE = 1
@@ -37,10 +41,20 @@ def touch(file):
 
 def verify():
     # execute autoit script to do varify exploit
+    #os.system("")
+    # wait the exploit execute
+    time.sleep(CRAX_TIME_EXPLOIT)
 
     # detect if `calc' process exists
-
     # touch NFS to signal the result
+    if "calc.exe" in [psutil.Process(i).name for i in psutil.get_pid_list()]:
+        print "Found a calc window"
+        touch(CRAX_COOKIE_VERIFY_OK)
+    else:
+        print "Not found"
+        touch(CRAX_COOKIE_VERIFY_FAIL)
+
+    return
 
 ###############################################################
 # Main
@@ -68,7 +82,7 @@ while True:
         break
     except socket.error:
         print 'socket error'
-        time.sleep(5)
+        time.sleep(CRAX_TIME_LONGWAIT)
         continue
     except socket.timeout:
         print 'socket timeout'
@@ -91,6 +105,8 @@ CRAX_COOKIE_SYMFILE_OK = os.path.join((CRAX_DIR_STAMPING, '.symfile_ok'))
 CRAX_COOKIE_TEST_VALIDATE = os.path.join((CRAX_DIR_STAMPING, '.test_validate'))
 CRAX_COOKIE_CLEAN_SNAPSHOT_OK = os.path.join((CRAX_DIR_STAMPING, '.clean_snapshot_ok'))
 CRAX_COOKIE_S2E_MODE = os.path.join((CRAX_DIR_STAMPING, '.symfile_s2e_mode'))
+CRAX_COOKIE_VERIFY_OK = os.path.join((CRAX_DIR_STAMPING, '.verify_ok'))
+CRAX_COOKIE_VERIFY_FAIL = os.path.join((CRAX_DIR_STAMPING, '.verify_fail'))
 
 if (os.path.isdir(CRAX_DIR_STAMPING)):
     pass
@@ -112,6 +128,13 @@ touch(CRAX_COOKIE_STAND_BY)
 # after inform, we should do a long wait here
 # until snapshot has been created
 
+# after the savevm point, the vm may run into 2 path:
+# - boot/loadvm by qemu in exploit-validate stage
+#   (host should create cookie file before booting)
+# - go through to do symfile
+#
+# so we check these 2 situations in the long wait
+
 while True:
     if (os.path.exists(CRAX_COOKIE_TEST_VALIDATE)):
 	print "get file ", CRAX_COOKIE_TEST_VALIDATE
@@ -123,7 +146,7 @@ while True:
 	print "get file ", CRAX_COOKIE_CLEAN_SNAPSHOT_OK
 	break
     else:
-	sleep(5)
+	sleep(CRAX_TIME_LONGWAIT)
 
 
 # -----------------------------
@@ -131,6 +154,7 @@ while True:
 # -----------------------------
 
 # execute autoit script to do symfile
+#os.system("")
 
 
 # wait symfile process to be static
@@ -155,7 +179,7 @@ while True:
 	print "get file ", CRAX_COOKIE_S2E_MODE
 	break
     else:
-	sleep(5)
+	sleep(CRAX_TIME_LONGWAIT)
 
 #############################################
 # Exploit generation state
@@ -166,6 +190,7 @@ while True:
 # -----------------------------
 
 # execute autoit script to do openfile
+#os.system("")
 
 
 # s2e-qemu may be killed in this state
