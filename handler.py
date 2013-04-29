@@ -42,7 +42,7 @@ def touch(file):
 
 def verify():
     # execute autoit script to do varify exploit
-    #os.system("")
+    os.system('Z:\\CRF\\autoit\\verify.exe ' + CRAX_STAMP)
     # wait the exploit execute
     time.sleep(CRAX_TIME_EXPLOIT)
 
@@ -161,7 +161,7 @@ while True:
 # -----------------------------
 
 # execute autoit script to do symfile
-#os.system("")
+os.system('Z:\\CRF\\autoit\\symfile.exe')
 
 
 # wait symfile process to be static
@@ -201,7 +201,7 @@ while True:
 # -----------------------------
 
 # execute autoit script to do openfile
-#os.system("")
+os.system('Z:\\CRF\\autoit\\openfile.exe')
 
 # s2e-qemu may be killed in this state
 

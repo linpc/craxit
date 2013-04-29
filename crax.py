@@ -3,6 +3,7 @@
 
 import pexpect
 import os
+import shutil
 import socket
 import sys
 import time
@@ -22,8 +23,10 @@ CRAX_PATH_S2E_QEMU = 'qemu-release/i386-s2e-softmmu/qemu'
 CRAX_PATH_OUTPUT = 's2e-last'
 CRAX_DIR_OUTPUT = os.path.join((CRAX_DIR_WORK, CRAX_PATH_OUTPUT))
 
-CRAX_BIN_QEMU = os.path.join(CRAX_DIR_BUILD, CRAX_PATH_QEMU)
-CRAX_BIN_S2E_QEMU = os.path.join(CRAX_DIR_BUILD, CRAX_PATH_S2E_QEMU)
+CRAX_BIN_QEMU = os.path.join((CRAX_DIR_BUILD, CRAX_PATH_QEMU))
+CRAX_BIN_S2E_QEMU = os.path.join((CRAX_DIR_BUILD, CRAX_PATH_S2E_QEMU))
+
+CRAX_FILE_Exploit = os.path.join((CRAX_DIR_OUTPUT, 'Exploit'))
 
 CRAX_IMG = '/home/linpc/u12/1112/windows.qcow2'
 
@@ -218,21 +221,24 @@ CRAX_WAIT_TIMEOUT = 600
 
 wait_time = 0
 
+sys.stdout.write('Waiting for guest doing exploit generation...')
+
 while (wait_time <= CRAX_WAIT_TIMEOUT):
     try:
-        crax_monitor.sendline('info snapshots')
+        crax_monitor.sendline('info status')
         crax_monitor.expect(CRAX_QEMU_PROMPT)
 
         # s2e-qemu not terminated, may be error
         #print crax_monitor.before
+        sys.stdout.write('.')
         time.sleep(10)
         wait_time += 10
     except pexpect.EOF:
-        print 'EOF exception'
+        print "\nEOF exception"
         # monitor process not exists, may be kill-state
         break
     except pexpect.TIMEOUT:
-        print 'TIMEOUT exception'
+        print "\nTIMEOUT exception"
         time.sleep(10)
         wait_time += 10
 
@@ -247,7 +253,8 @@ while (wait_time <= CRAX_WAIT_TIMEOUT):
 # - the first time s2e-qemu start? or
 # - the kill-state send to s2e-qemu?
 
-if (os.path.exists(os.path.join((CRAX_DIR_OUTPUT, 'Exploit')))):
+if (os.path.exists(CRAX_FILE_Exploit)):
+    shutil.copyfile(CRAX_FILE_Exploit, os.path.join((CRAX_DIR_STAMPING, 'Exploit.doc')))
     # copy file to NFS
 else:
     # no exploit generated, S2E run may be fail
