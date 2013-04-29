@@ -148,7 +148,7 @@ while True:
 
         # verify done, should terminate vm instance
         exit(0)
-    else if (os.path.exists(CRAX_COOKIE_CLEAN_SNAPSHOT_OK)):
+    elif (os.path.exists(CRAX_COOKIE_CLEAN_SNAPSHOT_OK)):
 	print "\nget file ", CRAX_COOKIE_CLEAN_SNAPSHOT_OK
 	break
     else:

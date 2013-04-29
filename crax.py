@@ -278,7 +278,7 @@ while True:
     if (os.path.exists(CRAX_COOKIE_VERIFY_OK)):
         print "done\nExploit verify passed"
         verify_result = 0
-    else if (os.path.exists(CRAX_COOKIE_VERIFY_FAIL)):
+    elif (os.path.exists(CRAX_COOKIE_VERIFY_FAIL)):
         print "done\nExploit verify failed"
     else
         sys.stdout.write('.')
