@@ -4,6 +4,7 @@
 import pexpect
 import os
 import socket
+import sys
 import time
 
 ###############################################################
@@ -143,10 +144,15 @@ crax_monitor.expect(CRAX_QEMU_PROMPT)
 # long wait the guest prepare to do a clean snapshot
 # CRAX_COOKIE_STAND_BY
 
+sys.stdout.write("Waiting for guest setting up environment...")
+
 while True:
     if (os.path.exists(CRAX_COOKIE_STAND_BY)):
+        print "done"
+        print "Now, doing savevm..."
         break
     else:
+        sys.stdout.write('.')
 	sleep(CRAX_TIME_LONGWAIT)
         continue
 
@@ -167,10 +173,16 @@ print crax_monitor.before
 
 # wait till symfile is done
 # CRAX_COOKIE_SYMFILE_OK
+
+sys.stdout.write('Waiting for guest doing symfile...')
+
 while True:
     if (os.path.exists(CRAX_COOKIE_SYMFILE_OK)):
+        print "done"
+        print "Now, doing savevm..."
         break
     else:
+        sys.stdout.write('.')
 	sleep(CRAX_TIME_LONGWAIT)
         continue
 
@@ -260,13 +272,16 @@ crax_monitor.expect(CRAX_QEMU_PROMPT)
 
 verify_result = 1
 
+sys.stdout.write("Waiting for guest doing verification process...")
+
 while True:
     if (os.path.exists(CRAX_COOKIE_VERIFY_OK)):
-        print "Exploit verify passed"
+        print "done\nExploit verify passed"
         verify_result = 0
     else if (os.path.exists(CRAX_COOKIE_VERIFY_FAIL)):
-        print "Exploit verify failed"
+        print "done\nExploit verify failed"
     else
+        sys.stdout.write('.')
         time.sleep(CRAX_TIME_LONGWAIT)
 
 crax_monitor.sendline('quit')

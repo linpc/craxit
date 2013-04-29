@@ -3,6 +3,7 @@
 import os
 import psutil
 import socket
+import sys
 import time
 
 ###############################################################
@@ -74,6 +75,8 @@ def verify():
 CRAX_MY_HOSTNAME = socket.gethostname()
 CRAX_MY_ADDR = socket.gethostbyname(CRAX_MY_HOSTNAME)
 
+sys.stdout.write("Waiting for socket connection to server...")
+
 while True:
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -81,10 +84,10 @@ while True:
 
         client.send(CRAX_MY_ADDR)
         CRAX_STAMP = client.recv(512)
-        print 'get stamp from host: ', CRAX_STAMP
+        print "\nget stamp from host: ", CRAX_STAMP
         break
     except socket.error:
-        print 'socket error'
+        sys.stdout.write('.')
         time.sleep(CRAX_TIME_LONGWAIT)
         continue
     except socket.timeout:
@@ -135,17 +138,21 @@ touch(CRAX_COOKIE_STAND_BY)
 #
 # so we check these 2 situations in the long wait
 
+sys.stdout.write("Waiting for SAVEVM done...")
+
 while True:
     if (os.path.exists(CRAX_COOKIE_TEST_VALIDATE)):
-	print "get file ", CRAX_COOKIE_TEST_VALIDATE
+	print "\nget file ", CRAX_COOKIE_TEST_VALIDATE
+        print "Do VERIFY process now"
         verify()
 
         # verify done, should terminate vm instance
         exit(0)
     else if (os.path.exists(CRAX_COOKIE_CLEAN_SNAPSHOT_OK)):
-	print "get file ", CRAX_COOKIE_CLEAN_SNAPSHOT_OK
+	print "\nget file ", CRAX_COOKIE_CLEAN_SNAPSHOT_OK
 	break
     else:
+        sys.stdout.write('.')
 	sleep(CRAX_TIME_LONGWAIT)
 
 
@@ -171,14 +178,18 @@ CRAX_STATUS = CRAX_STATUS_SYMFILE
 
 touch(CRAX_COOKIE_SYMFILE_OK)
 
+sys.stdout.write("Wating for SAVEVM done...")
+
 # after inform, we should do a long wait here
 # until S2E mode is taken effect
 
 while True:
     if (os.path.exists(CRAX_COOKIE_S2E_MODE)):
-	print "get file ", CRAX_COOKIE_S2E_MODE
+	print "\nget file ", CRAX_COOKIE_S2E_MODE
+        print "Running in S2E mode now"
 	break
     else:
+        sys.stdout.write('.')
 	sleep(CRAX_TIME_LONGWAIT)
 
 #############################################
