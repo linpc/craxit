@@ -295,8 +295,10 @@ while True:
     if (os.path.exists(CRAX_COOKIE_VERIFY_OK)):
         print "done\nExploit verify passed"
         verify_result = 0
+        break
     elif (os.path.exists(CRAX_COOKIE_VERIFY_FAIL)):
         print "done\nExploit verify failed"
+        break
     else:
         sys.stdout.write('.')
         time.sleep(CRAX_TIME_LONGWAIT)

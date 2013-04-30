@@ -17,7 +17,7 @@ CRAX_DIR_AUTOIT = os.path.join(CRAX_DIR_NFS, 'autoit')
 CRAX_HOST_IP = '10.113.208.67'
 CRAX_HOST_PORT = 12345
 
-CRAX_TIME_SYMFILE = 60
+CRAX_TIME_SYMFILE = 90
 CRAX_TIME_EXPLOIT = 20
 CRAX_TIME_LONGWAIT = 5
 
@@ -218,7 +218,7 @@ while True:
 
 # execute autoit script to do openfile
 # to let symfile program static
-time.sleep(30)
+time.sleep(10)
 os.system('Z:\\CRF\\autoit\\openfile.exe')
 
 # s2e-qemu may be killed in this state
