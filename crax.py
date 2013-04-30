@@ -13,7 +13,7 @@ import time
 ###############################################################
 
 CRAX_DIR_NFS = '/home/CRF'
-CRAX_DIR_STAMP = os.path.join((CRAX_DIR_NFS, 'stamp'))
+CRAX_DIR_STAMP = os.path.join(CRAX_DIR_NFS, 'stamp')
 
 CRAX_DIR_WORK = '/home/linpc/u12/1112/run'
 CRAX_DIR_BUILD = '/home/linpc/u12/1112/build'
@@ -21,16 +21,16 @@ CRAX_PATH_QEMU = 'qemu-release/i386-softmmu/qemu'
 CRAX_PATH_S2E_QEMU = 'qemu-release/i386-s2e-softmmu/qemu'
 
 CRAX_PATH_OUTPUT = 's2e-last'
-CRAX_DIR_OUTPUT = os.path.join((CRAX_DIR_WORK, CRAX_PATH_OUTPUT))
+CRAX_DIR_OUTPUT = os.path.join(CRAX_DIR_WORK, CRAX_PATH_OUTPUT)
 
-CRAX_BIN_QEMU = os.path.join((CRAX_DIR_BUILD, CRAX_PATH_QEMU))
-CRAX_BIN_S2E_QEMU = os.path.join((CRAX_DIR_BUILD, CRAX_PATH_S2E_QEMU))
+CRAX_BIN_QEMU = os.path.join(CRAX_DIR_BUILD, CRAX_PATH_QEMU)
+CRAX_BIN_S2E_QEMU = os.path.join(CRAX_DIR_BUILD, CRAX_PATH_S2E_QEMU)
 
-CRAX_FILE_Exploit = os.path.join((CRAX_DIR_OUTPUT, 'Exploit'))
+CRAX_FILE_Exploit = os.path.join(CRAX_DIR_OUTPUT, 'Exploit')
 
 CRAX_IMG = '/home/linpc/u12/1112/windows.qcow2'
 
-CRAX_VM_CLEAN = 'cleanfix'
+CRAX_VM_CLEAN = 'Cclean'
 CRAX_VM_READY = 'Cready'
 CRAX_VM_SYMFILE = 'Coffice2'
 
@@ -66,7 +66,7 @@ CRAX_TIME_LONGWAIT = 5
 CRAX_STAMP = int(time.time())
 
 while True:
-    CRAX_DIR_STAMPING = os.path.join((CRAX_DIR_STAMP, CRAX_STAMP))
+    CRAX_DIR_STAMPING = os.path.join(CRAX_DIR_STAMP, str(CRAX_STAMP))
     if (os.path.isdir(CRAX_DIR_STAMPING)):
         CRAX_STAMP += 1
         continue
@@ -74,13 +74,13 @@ while True:
         os.mkdir(CRAX_DIR_STAMPING, 0777)
         break
 
-CRAX_COOKIE_STAND_BY = os.path.join((CRAX_DIR_STAMPING, '.stand_by'))
-CRAX_COOKIE_SYMFILE_OK = os.path.join((CRAX_DIR_STAMPING, '.symfile_ok'))
-CRAX_COOKIE_TEST_VALIDATE = os.path.join((CRAX_DIR_STAMPING, '.test_validate'))
-CRAX_COOKIE_CLEAN_SNAPSHOT_OK = os.path.join((CRAX_DIR_STAMPING, '.clean_snapshot_ok'))
-CRAX_COOKIE_S2E_MODE = os.path.join((CRAX_DIR_STAMPING, '.symfile_s2e_mode'))
-CRAX_COOKIE_VERIFY_OK = os.path.join((CRAX_DIR_STAMPING, '.verify_ok'))
-CRAX_COOKIE_VERIFY_FAIL = os.path.join((CRAX_DIR_STAMPING, '.verify_fail'))
+CRAX_COOKIE_STAND_BY = os.path.join(CRAX_DIR_STAMPING, '.stand_by')
+CRAX_COOKIE_SYMFILE_OK = os.path.join(CRAX_DIR_STAMPING, '.symfile_ok')
+CRAX_COOKIE_TEST_VALIDATE = os.path.join(CRAX_DIR_STAMPING, '.test_validate')
+CRAX_COOKIE_CLEAN_SNAPSHOT_OK = os.path.join(CRAX_DIR_STAMPING, '.clean_snapshot_ok')
+CRAX_COOKIE_S2E_MODE = os.path.join(CRAX_DIR_STAMPING, '.symfile_s2e_mode')
+CRAX_COOKIE_VERIFY_OK = os.path.join(CRAX_DIR_STAMPING, '.verify_ok')
+CRAX_COOKIE_VERIFY_FAIL = os.path.join(CRAX_DIR_STAMPING, '.verify_fail')
 
 ###############################################################
 # functions
@@ -111,6 +111,8 @@ if pid == 0:
     host = "10.113.208.67"
     port = 12345
 
+    print "This is child process..."
+    print "Now, open socket at", port, "to listen guest connect in to get stamp information"
     server.bind(("", port))
 
     server.listen(5)
@@ -125,6 +127,7 @@ if pid == 0:
         break
 
     # terminate child process
+    print "child process: Close socket"
     exit(0)
 else:
     # parent process
@@ -136,6 +139,8 @@ else:
 
 os.chdir(CRAX_DIR_WORK)
 print "Current directory: ", os.getcwd()
+
+print "Start up VM with snapshot", CRAX_VM_CLEAN
 
 crax_monitor = pexpect.spawn(' '.join((CRAX_BIN_QEMU, CRAX_ARGS)))
 crax_monitor.expect(CRAX_QEMU_PROMPT)
@@ -156,7 +161,7 @@ while True:
         break
     else:
         sys.stdout.write('.')
-	sleep(CRAX_TIME_LONGWAIT)
+	time.sleep(CRAX_TIME_LONGWAIT)
         continue
 
 crax_monitor.sendline('savevm ' + CRAX_VM_READY)
@@ -186,7 +191,7 @@ while True:
         break
     else:
         sys.stdout.write('.')
-	sleep(CRAX_TIME_LONGWAIT)
+	time.sleep(CRAX_TIME_LONGWAIT)
         continue
 
 crax_monitor.sendline('savevm ' + CRAX_VM_SYMFILE)
@@ -204,6 +209,8 @@ crax_monitor.sendline('quit')
 # -----------------------------
 
 touch(CRAX_COOKIE_S2E_MODE)
+
+print "Start up VM with snapshot", CRAX_VM_SYMFILE
 
 crax_monitor = pexpect.spawn(' '.join((CRAX_BIN_S2E_QEMU, CRAX_ARGS_S2E)))
 crax_monitor.expect(CRAX_QEMU_PROMPT)
@@ -254,7 +261,8 @@ while (wait_time <= CRAX_WAIT_TIMEOUT):
 # - the kill-state send to s2e-qemu?
 
 if (os.path.exists(CRAX_FILE_Exploit)):
-    shutil.copyfile(CRAX_FILE_Exploit, os.path.join((CRAX_DIR_STAMPING, 'Exploit.doc')))
+    print "Copy generated exploit to", CRAX_DIR_STAMPING
+    shutil.copyfile(CRAX_FILE_Exploit, os.path.join(CRAX_DIR_STAMPING, 'Exploit.doc'))
     # copy file to NFS
 else:
     # no exploit generated, S2E run may be fail
@@ -267,6 +275,8 @@ else:
 
 # inform guest to do verify routine instead of symfile
 touch(CRAX_COOKIE_TEST_VALIDATE)
+
+print "Start up VM with snapshot", CRAX_VM_READY
 
 crax_monitor = pexpect.spawn(' '.join((CRAX_BIN_QEMU, CRAX_ARGS_VERIFY)))
 crax_monitor.expect(CRAX_QEMU_PROMPT)
@@ -287,7 +297,7 @@ while True:
         verify_result = 0
     elif (os.path.exists(CRAX_COOKIE_VERIFY_FAIL)):
         print "done\nExploit verify failed"
-    else
+    else:
         sys.stdout.write('.')
         time.sleep(CRAX_TIME_LONGWAIT)
 

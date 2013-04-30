@@ -11,13 +11,13 @@ import time
 ###############################################################
 
 CRAX_DIR_NFS = 'Z:\CRF'
-CRAX_DIR_STAMP = os.path.join((CRAX_DIR_NFS, 'stamp'))
-CRAX_DIR_AUTOIT = os.path.join((CRAX_DIR_NFS, 'autoit'))
+CRAX_DIR_STAMP = os.path.join(CRAX_DIR_NFS, 'stamp')
+CRAX_DIR_AUTOIT = os.path.join(CRAX_DIR_NFS, 'autoit')
 
 CRAX_HOST_IP = '10.113.208.67'
 CRAX_HOST_PORT = 12345
 
-CRAX_TIME_SYMFILE = 30
+CRAX_TIME_SYMFILE = 60
 CRAX_TIME_EXPLOIT = 20
 CRAX_TIME_LONGWAIT = 5
 
@@ -42,6 +42,7 @@ def touch(file):
 
 def verify():
     # execute autoit script to do varify exploit
+    os.system('Z:\\CRF\\autoit\\wakeup.exe')
     os.system('Z:\\CRF\\autoit\\verify.exe ' + CRAX_STAMP)
     # wait the exploit execute
     time.sleep(CRAX_TIME_EXPLOIT)
@@ -92,6 +93,7 @@ while True:
         continue
     except socket.timeout:
         print 'socket timeout'
+#CRAX_STAMP = '1367300645'
 
 #############################################
 # Symfile state
@@ -101,21 +103,28 @@ while True:
 # got stamp, prepare environment
 # -----------------------------
 
-CRAX_DIR_STAMPING = os.path.join((CRAX_DIR_STAMP, CRAX_STAMP))
+CRAX_DIR_STAMPING = os.path.join(CRAX_DIR_STAMP, CRAX_STAMP)
 
-CRAX_COOKIE_STAND_BY = os.path.join((CRAX_DIR_STAMPING, '.stand_by'))
-CRAX_COOKIE_SYMFILE_OK = os.path.join((CRAX_DIR_STAMPING, '.symfile_ok'))
-CRAX_COOKIE_TEST_VALIDATE = os.path.join((CRAX_DIR_STAMPING, '.test_validate'))
-CRAX_COOKIE_CLEAN_SNAPSHOT_OK = os.path.join((CRAX_DIR_STAMPING, '.clean_snapshot_ok'))
-CRAX_COOKIE_S2E_MODE = os.path.join((CRAX_DIR_STAMPING, '.symfile_s2e_mode'))
-CRAX_COOKIE_VERIFY_OK = os.path.join((CRAX_DIR_STAMPING, '.verify_ok'))
-CRAX_COOKIE_VERIFY_FAIL = os.path.join((CRAX_DIR_STAMPING, '.verify_fail'))
+CRAX_COOKIE_STAND_BY = os.path.join(CRAX_DIR_STAMPING, '.stand_by')
+CRAX_COOKIE_SYMFILE_OK = os.path.join(CRAX_DIR_STAMPING, '.symfile_ok')
+CRAX_COOKIE_TEST_VALIDATE = os.path.join(CRAX_DIR_STAMPING, '.test_validate')
+CRAX_COOKIE_CLEAN_SNAPSHOT_OK = os.path.join(CRAX_DIR_STAMPING, '.clean_snapshot_ok')
+CRAX_COOKIE_S2E_MODE = os.path.join(CRAX_DIR_STAMPING, '.symfile_s2e_mode')
+CRAX_COOKIE_VERIFY_OK = os.path.join(CRAX_DIR_STAMPING, '.verify_ok')
+CRAX_COOKIE_VERIFY_FAIL = os.path.join(CRAX_DIR_STAMPING, '.verify_fail')
 
-if (os.path.isdir(CRAX_DIR_STAMPING)):
-    pass
-else:
-    # may be error, stamp directory not exists
-    exit(1)
+os.system('Z:\\CRF\\autoit\\wakeup.exe')
+
+while True:
+    if (os.path.isdir(CRAX_DIR_STAMPING)):
+        print CRAX_DIR_STAMPING, "directory checking passed"
+        break
+    else:
+        # may be error, stamp directory not exists
+        print "Error: stamp directory", CRAX_DIR_STAMPING, "not exists"
+        time.sleep(CRAX_TIME_LONGWAIT)
+        continue
+        #exit(1)
 
 # -----------------------------
 # inform host to do 1st savevm for exploit validation
@@ -149,11 +158,18 @@ while True:
         # verify done, should terminate vm instance
         exit(0)
     elif (os.path.exists(CRAX_COOKIE_CLEAN_SNAPSHOT_OK)):
+	time.sleep(CRAX_TIME_LONGWAIT)
+        if (os.path.exists(CRAX_COOKIE_TEST_VALIDATE)):
+            print "\nget file ", CRAX_COOKIE_TEST_VALIDATE
+            print "Do VERIFY process now"
+            verify()
+            exit(0)
+
 	print "\nget file ", CRAX_COOKIE_CLEAN_SNAPSHOT_OK
 	break
     else:
         sys.stdout.write('.')
-	sleep(CRAX_TIME_LONGWAIT)
+	time.sleep(CRAX_TIME_LONGWAIT)
 
 
 # -----------------------------
@@ -190,7 +206,7 @@ while True:
 	break
     else:
         sys.stdout.write('.')
-	sleep(CRAX_TIME_LONGWAIT)
+	time.sleep(CRAX_TIME_LONGWAIT)
 
 #############################################
 # Exploit generation state
@@ -201,6 +217,8 @@ while True:
 # -----------------------------
 
 # execute autoit script to do openfile
+# to let symfile program static
+time.sleep(30)
 os.system('Z:\\CRF\\autoit\\openfile.exe')
 
 # s2e-qemu may be killed in this state
